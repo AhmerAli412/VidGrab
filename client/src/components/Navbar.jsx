@@ -27,7 +27,7 @@ const Navbar = () => {
                 <a
                   className="group"
                   aria-label="GitHub"
-                  href="https://github.com/VenoM9078/brandite"
+                  href="https://github.com/AhmerAli412/VidGrab"
                 >
                   <svg
                     aria-hidden="true"

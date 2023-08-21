@@ -85,13 +85,14 @@
 
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import './App.css'; // Create an App.css file for styling
+import './App.css';
 import Navbar from './components/Navbar';
 
 function App() {
   const [url, setUrl] = useState('');
-  const [qualities] = useState(['highest', 'lowest', 'medium']); // Add your desired qualities
+  const [qualities] = useState(['highest', 'lowest', 'medium']);
   const [selectedQuality, setSelectedQuality] = useState('');
+  const [downloadStatus, setDownloadStatus] = useState('Download');
   const [downloading, setDownloading] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState({ percent: 0, totalSize: 0 });
 
@@ -101,6 +102,7 @@ function App() {
 
   const handleDownload = async () => {
     try {
+      setDownloadStatus('Downloading...');
       setDownloading(true);
       setDownloadProgress({ percent: 0, totalSize: 0 });
 
@@ -118,11 +120,10 @@ function App() {
         }
       );
 
-      // Handle response, e.g., show a download link or success message
       console.log('Download response:', response.data);
+      setDownloadStatus('Successfully Downloaded!');
     } catch (error) {
       console.error('Error downloading video:', error);
-      // Handle error, e.g., show an error message
     } finally {
       setDownloading(false);
     }
@@ -173,7 +174,7 @@ function App() {
         disabled={downloading}
         className="px-6 py-2 mt-4 bg-gradient-to-tr from-orange-500 to-yellow-300 hover:from-orange-600 hover:to-yellow-400 text-white rounded-md disabled:bg-gray-400 disabled:cursor-not-allowed w-50"
       >
-        {downloading ? 'Downloading...' : 'Download'}
+        {downloadStatus}
       </button>
         {downloading && (
           <div className="progress-bar mt-4">
