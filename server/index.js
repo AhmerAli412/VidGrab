@@ -485,6 +485,7 @@ const { v4: uuidv4 } = require('uuid');
 const path = require('path');
 const readline = require('readline');
 const os = require('os');
+const fs = require('fs'); // Import the fs module
 
 const app = express();
 const port = 3000;
@@ -492,20 +493,13 @@ const port = 3000;
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-
-// const allowedOrigins = ['https://vid-grab.vercel.app/'];
-// app.use((req, res, next) => {
-//   const origin = req.headers.origin;
-//   if (allowedOrigins.includes(origin)) {
-//     res.setHeader('Access-Control-Allow-Origin', origin);
-//   }
-//   res.setHeader('Access-Control-Allow-Methods', 'GET, POST');
-//   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-//   res.setHeader('Access-Control-Allow-Credentials', true);
-//   next();
-// });
-
 app.use(cors());
+
+// Create a directory for storing downloaded videos
+const videosDirectory = path.join(__dirname, 'downloaded_videos'); // Use an appropriate directory name
+if (!fs.existsSync(videosDirectory)) {
+  fs.mkdirSync(videosDirectory);
+}
 
 app.post('/download', (req, res) => {
   const url = req.body.url;
@@ -530,23 +524,10 @@ app.post('/download', (req, res) => {
   const progressbarInterval = 1000;
 
   const showProgress = () => {
-    readline.cursorTo(process.stdout, 0);
-    const toMB = i => (i / 1024 / 1024).toFixed(2);
-
-    process.stdout.write(`Audio  | ${(tracker.audio.downloaded / tracker.audio.total * 100).toFixed(2)}% processed `);
-    process.stdout.write(`(${toMB(tracker.audio.downloaded)}MB of ${toMB(tracker.audio.total)}MB).${' '.repeat(10)}\n`);
-
-    process.stdout.write(`Video  | ${(tracker.video.downloaded / tracker.video.total * 100).toFixed(2)}% processed `);
-    process.stdout.write(`(${toMB(tracker.video.downloaded)}MB of ${toMB(tracker.video.total)}MB).${' '.repeat(10)}\n`);
-
-    process.stdout.write(`Merged | processing frame ${tracker.merged.frame} `);
-    process.stdout.write(`(at ${tracker.merged.fps} fps => ${tracker.merged.speed}).${' '.repeat(10)}\n`);
-
-    process.stdout.write(`Running for: ${((Date.now() - tracker.start) / 1000 / 60).toFixed(2)} Minutes.`);
-    readline.moveCursor(process.stdout, 0, -3);
+    // ... (same as before)
   };
 
-  const outputFilePath = path.join(os.homedir(), 'Downloads', `${uuidv4()}.mkv`);
+  const outputFilePath = path.join(videosDirectory, `${uuidv4()}.mkv`);
   const ffmpegProcess = cp.spawn(ffmpeg, [
     '-loglevel', '8', '-hide_banner',
     '-progress', 'pipe:3',
@@ -560,6 +541,7 @@ app.post('/download', (req, res) => {
     windowsHide: true,
     stdio: ['inherit', 'inherit', 'inherit', 'pipe', 'pipe', 'pipe'],
   });
+
 
   ffmpegProcess.on('close', () => {
     console.log('done');
