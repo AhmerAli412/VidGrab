@@ -493,7 +493,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // Update your CORS configuration to allow specific origins
-const allowedOrigins = ['https://vid-grab.vercel.app'];
+const allowedOrigins = ['https://vid-grab.vercel.app/'];
 app.use((req, res, next) => {
   const origin = req.headers.origin;
   if (allowedOrigins.includes(origin)) {
