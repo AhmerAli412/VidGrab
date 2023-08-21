@@ -487,18 +487,24 @@ const readline = require('readline');
 const os = require('os');
 
 const app = express();
-const port = 3001;
+const port = 3000;
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Configure CORS to allow requests from specific origins
-const allowedOrigins = ['https://vid-grab.vercel.app'];
-app.use(cors({
-  origin: allowedOrigins,
-  methods: 'GET, POST',
-  credentials: true,
-}));
+
+const allowedOrigins = ['https://vid-grab.vercel.app/'];
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  next();
+});
+
 
 app.post('/download', (req, res) => {
   const url = req.body.url;
