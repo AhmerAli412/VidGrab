@@ -1,0 +1,30 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+.dotted-background {
+  background-image: radial-gradient(#181818 5%, #0000001f 15%);
+  background-color: #000000;
+  background-position: 0 0, 14px 14px;
+  background-size: 16px 16px;
+  /* height: 30px; */
+  position: absolute !important;
+  width: 100%;
+}
+
+.progress-bar {
+  background-color: #f3f4f6;
+  border-radius: 8px;
+  height: 10px;
+  overflow: hidden;
+}
+
+.progress {
+  background-color: #1c64f2;
+  height: 100%;
+}
+
+.input-container {
+  margin-top: 1.5rem;
+}
