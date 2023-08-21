@@ -107,7 +107,7 @@ function App() {
       setDownloadProgress({ percent: 0, totalSize: 0 });
 
       const response = await axios.post(
-        'http://localhost:3000/download',
+        'https://vidgrab-oa31.onrender.com/download',
         {
           url: url,
           quality: selectedQuality,
