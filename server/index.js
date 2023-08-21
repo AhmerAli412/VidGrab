@@ -493,6 +493,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // Update your CORS configuration to allow multiple origins
+// Update your CORS configuration to allow multiple origins
 const allowedOrigins = ['http://localhost:3000', 'https://vid-grab.vercel.app'];
 app.use((req, res, next) => {
   const origin = req.headers.origin;
@@ -501,8 +502,10 @@ app.use((req, res, next) => {
   }
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Credentials', true); // Allow credentials if needed
   next();
 });
+
 
 
 
