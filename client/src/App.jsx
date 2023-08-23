@@ -143,9 +143,9 @@ function App() {
             Downloader
           </span>
         </h1>
-        <h2 className="text-neutral-500 mx-auto max-w-screen-sm text-center">
+        <h3 className="text-neutral-500 mx-auto max-w-screen-sm text-center">
           Download your favorite videos from YouTube with ease. Enter the video URL and choose the quality.
-        </h2>
+        </h3>
         <hr className="w-96 h-1 mx-auto opacity-20 bg-gray-100 border-0 rounded md:my-8 dark:bg-gray-700" />
         <div className="input-container ">
           {/* <label className="text-neutral-500">Video URL:</label> */}
