@@ -101,9 +101,9 @@ function App() {
       setDownloadStatus('Downloading...');
       setDownloading(true);
       setDownloadProgress({ percent: 0, totalSize: 0 });
-
+  
       const response = await axios.post(
-        'http://localhost:3000/download', // Use the relative URL
+        'https://vidgrab-oa31.onrender.com/download', // Use the relative URL based on the proxy setting
         {
           url: url,
           quality: selectedQuality,
@@ -113,10 +113,11 @@ function App() {
             const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
             setDownloadProgress({ percent: percentCompleted, totalSize: progressEvent.total });
           },
+          responseType: 'blob', // Make sure to set the response type to 'blob'
         }
       );
-
-      console.log('Download response:', response.data);
+  
+      console.log('Download response:', response);
       setDownloadStatus('Successfully Downloaded!');
     } catch (error) {
       console.error('Error downloading video:', error);
@@ -124,7 +125,7 @@ function App() {
       setDownloading(false);
     }
   };
-
+  
 
   return (
     <div className="App">

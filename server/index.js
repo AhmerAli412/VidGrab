@@ -483,7 +483,6 @@ const cp = require('child_process');
 const cors = require('cors');
 const { v4: uuidv4 } = require('uuid');
 const path = require('path');
-const fs = require('fs');
 
 const app = express();
 const port = 3000;
@@ -491,11 +490,6 @@ const port = 3000;
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors()); // Use the cors middleware
-
-const videosDirectory = path.join(__dirname, 'downloaded_videos');
-if (!fs.existsSync(videosDirectory)) {
-  fs.mkdirSync(videosDirectory);
-}
 
 app.post('/download', async (req, res) => {
   try {
@@ -505,7 +499,9 @@ app.post('/download', async (req, res) => {
     const audio = ytdl(url, { quality: `${quality}audio` });
     const video = ytdl(url, { quality: `${quality}video` });
 
-    const outputFilePath = path.join(videosDirectory, `${uuidv4()}.mkv`);
+    res.setHeader('Content-Disposition', 'attachment; filename="downloaded_video.mkv"');
+    res.setHeader('Content-Type', 'video/mkv');
+
     const ffmpegProcess = cp.spawn(ffmpeg, [
       '-loglevel', '8', '-hide_banner',
       '-i', 'pipe:4',
@@ -513,25 +509,15 @@ app.post('/download', async (req, res) => {
       '-map', '0:a',
       '-map', '1:v',
       '-c:v', 'copy',
-      outputFilePath,
+      'pipe:1',
     ], {
       windowsHide: true,
       stdio: ['inherit', 'inherit', 'inherit', 'pipe', 'pipe', 'pipe'],
     });
 
-    ffmpegProcess.on('close', () => {
-      res.download(outputFilePath, 'downloaded_video.mkv', (err) => {
-        if (err) {
-          console.error('Error sending the video file:', err);
-          res.status(500).json({ message: 'Error sending the video file.' });
-        } else {
-          fs.unlinkSync(outputFilePath);
-        }
-      });
-    });
-
     audio.pipe(ffmpegProcess.stdio[4]);
     video.pipe(ffmpegProcess.stdio[5]);
+    ffmpegProcess.stdout.pipe(res);
   } catch (error) {
     console.error('Error processing and sending the video:', error);
     res.status(500).json({ message: 'Error processing and sending the video.' });
