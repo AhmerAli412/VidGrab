@@ -85,6 +85,7 @@
 
 import React, { useState } from 'react';
 import axios from 'axios';
+import { saveAs } from 'file-saver';
 import './App.css';
 import Navbar from './components/Navbar';
 
@@ -101,7 +102,7 @@ function App() {
       setDownloadStatus('Downloading...');
       setDownloading(true);
       setDownloadProgress({ percent: 0, totalSize: 0 });
-  
+
       const response = await axios.post(
         'https://vidgrab-oa31.onrender.com/download', // Use the relative URL based on the proxy setting
         {
@@ -116,8 +117,9 @@ function App() {
           responseType: 'blob', // Make sure to set the response type to 'blob'
         }
       );
-  
-      console.log('Download response:', response);
+
+      saveAs(response.data, 'downloaded_video.mkv'); // Trigger download
+
       setDownloadStatus('Successfully Downloaded!');
     } catch (error) {
       console.error('Error downloading video:', error);
@@ -125,7 +127,6 @@ function App() {
       setDownloading(false);
     }
   };
-  
 
   return (
     <div className="App">
