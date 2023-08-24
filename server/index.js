@@ -483,100 +483,64 @@ const cp = require('child_process');
 const cors = require('cors');
 const { v4: uuidv4 } = require('uuid');
 const path = require('path');
-const readline = require('readline');
-const os = require('os');
-const fs = require('fs'); // Import the fs module
+const fs = require('fs');
 
 const app = express();
 const port = 3000;
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cors()); // Use the cors middleware
 
-app.use(cors());
-
-// Create a directory for storing downloaded videos
-const videosDirectory = path.join(__dirname, 'downloaded_videos'); // Use an appropriate directory name
+const videosDirectory = path.join(__dirname, 'downloaded_videos');
 if (!fs.existsSync(videosDirectory)) {
   fs.mkdirSync(videosDirectory);
 }
 
-app.post('/download', (req, res) => {
-  const url = req.body.url;
-  const quality = req.body.quality;
+app.post('/download', async (req, res) => {
+  try {
+    const url = req.body.url;
+    const quality = req.body.quality;
 
-  const tracker = {
-    start: Date.now(),
-    audio: { downloaded: 0, total: Infinity },
-    video: { downloaded: 0, total: Infinity },
-    merged: { frame: 0, speed: '0x', fps: 0 },
-  };
+    const audio = ytdl(url, { quality: `${quality}audio` });
+    const video = ytdl(url, { quality: `${quality}video` });
 
-  const audio = ytdl(url, { quality: `${quality}audio` }).on('progress', (_, downloaded, total) => {
-    tracker.audio = { downloaded, total };
-  });
+    const outputFilePath = path.join(videosDirectory, `${uuidv4()}.mkv`);
+    const ffmpegProcess = cp.spawn(ffmpeg, [
+      '-loglevel', '8', '-hide_banner',
+      '-i', 'pipe:4',
+      '-i', 'pipe:5',
+      '-map', '0:a',
+      '-map', '1:v',
+      '-c:v', 'copy',
+      outputFilePath,
+    ], {
+      windowsHide: true,
+      stdio: ['inherit', 'inherit', 'inherit', 'pipe', 'pipe', 'pipe'],
+    });
 
-  const video = ytdl(url, { quality: `${quality}video` }).on('progress', (_, downloaded, total) => {
-    tracker.video = { downloaded, total };
-  });
+    ffmpegProcess.on('close', () => {
+      res.download(outputFilePath, 'downloaded_video.mkv', (err) => {
+        if (err) {
+          console.error('Error sending the video file:', err);
+          res.status(500).json({ message: 'Error sending the video file.' });
+        } else {
+          fs.unlinkSync(outputFilePath);
+        }
+      });
+    });
 
-  let progressbarHandle = null;
-  const progressbarInterval = 1000;
-
-  const showProgress = () => {
-    // ... (same as before)
-  };
-
-  const outputFilePath = path.join(videosDirectory, `${uuidv4()}.mkv`);
-  const ffmpegProcess = cp.spawn(ffmpeg, [
-    '-loglevel', '8', '-hide_banner',
-    '-progress', 'pipe:3',
-    '-i', 'pipe:4',
-    '-i', 'pipe:5',
-    '-map', '0:a',
-    '-map', '1:v',
-    '-c:v', 'copy',
-    outputFilePath,
-  ], {
-    windowsHide: true,
-    stdio: ['inherit', 'inherit', 'inherit', 'pipe', 'pipe', 'pipe'],
-  });
-
-
-  ffmpegProcess.on('close', () => {
-    console.log('done');
-    process.stdout.write('\n\n\n\n');
-    clearInterval(progressbarHandle);
-
-    res.status(200).json({ message: 'Video downloaded successfully.' });
-  });
-
-  ffmpegProcess.stdio[3].on('data', chunk => {
-    if (!progressbarHandle) progressbarHandle = setInterval(showProgress, progressbarInterval);
-    const lines = chunk.toString().trim().split('\n');
-    const args = {};
-    for (const l of lines) {
-      const [key, value] = l.split('=');
-      args[key.trim()] = value.trim();
-    }
-    tracker.merged = args;
-  });
-
-  audio.pipe(ffmpegProcess.stdio[4]);
-  video.pipe(ffmpegProcess.stdio[5]);
+    audio.pipe(ffmpegProcess.stdio[4]);
+    video.pipe(ffmpegProcess.stdio[5]);
+  } catch (error) {
+    console.error('Error processing and sending the video:', error);
+    res.status(500).json({ message: 'Error processing and sending the video.' });
+  }
 });
 
 app.listen(port, () => {
-  console.log(`Server is listening on :${port}`);
+  console.log(`Server is listening on port ${port}`);
 });
-
-
-
-
-
-
-
-
 
 
 

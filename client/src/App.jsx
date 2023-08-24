@@ -83,7 +83,7 @@
 
 
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
 import './App.css';
 import Navbar from './components/Navbar';
@@ -96,10 +96,6 @@ function App() {
   const [downloading, setDownloading] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState({ percent: 0, totalSize: 0 });
 
-  useEffect(() => {
-    document.body.style.backgroundImage = "url('https://www.useblackbox.io/style/images/bg-shape-006-p-2000.png')";
-  }, []);
-
   const handleDownload = async () => {
     try {
       setDownloadStatus('Downloading...');
@@ -107,7 +103,7 @@ function App() {
       setDownloadProgress({ percent: 0, totalSize: 0 });
 
       const response = await axios.post(
-        'https://vidgrab-oa31.onrender.com/download',
+        'http://localhost:3000/download', // Use the relative URL
         {
           url: url,
           quality: selectedQuality,
@@ -128,6 +124,7 @@ function App() {
       setDownloading(false);
     }
   };
+
 
   return (
     <div className="App">
