@@ -13,7 +13,7 @@
 //   merged: { frame: 0, speed: '0x', fps: 0 },
 // };
 
-// // Get audio and video streams
+// Get audio and video streams
 // const audio = ytdl(ref, { quality: 'highestaudio' })
 //   .on('progress', (_, downloaded, total) => {
 //     tracker.audio = { downloaded, total };
@@ -75,8 +75,8 @@
 //   clearInterval(progressbarHandle);
 // });
 
-// // Link streams
-// // FFmpeg creates the transformer streams and we just have to insert / read data
+
+// FFmpeg creates the transformer streams and we just have to insert / read data
 // ffmpegProcess.stdio[3].on('data', chunk => {
 //   // Start the progress bar
 //   if (!progressbarHandle) progressbarHandle = setInterval(showProgress, progressbarInterval);
