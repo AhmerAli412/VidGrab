@@ -491,7 +491,9 @@ const port = 3000;
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(cors()); // Use the cors middleware
+app.use(cors({
+  origin: 'https://vid-grab.vercel.app'
+}));
 
 const videosDirectory = path.join(__dirname, 'downloaded_videos');
 if (!fs.existsSync(videosDirectory)) {
